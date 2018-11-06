@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>converter</title>
+</head>
+<body>
+
+var a = +prompt('Введіть суму'); console.log(a);
+
+var simpleUnits = ["нуль ","одна ","дві ","три ","чотири ", "п'ять ","шість ","сім ","вісім ","дев'ять ","десять ","одинадцять ","дванадцять ","тринадцять ","чотирнадцять ","п'ятнадцять ","шістнадцять ","сімнадцять ","вісімнадцять ","дев'ятнадцять "];
+var tens = ["", "", "двадцять ","тридцять ","сорок ","п'ятдесят ", "шістдесят ","сімдесят ","вісімдесят ","дев'яносто "];
+var hundreds = ["","сто ","двісті ","триста ","чотириста ","п'ятсот ","шістсот ","сімсот ","вісімсот ","дев'ятсот "];
+
+function numToWords (num) {
+    var theword = "";
+	var started;
+	if (num>999) return "Сума завелика";
+	if (num===0) return simpleUnits[0];
+  
+    var hund  = Math.floor(num/100)
+    theword+=hundreds[hund];
+    num -= hund*100;
+  
+    var ten = Math.floor(num/10);
+    theword+=tens[ten];
+    num -= ten*10;
+ 
+    theword+=simpleUnits[num];
+  
+	if (num ===0 || num > 4) theword += "гривень";
+      else if (num >1 && num <= 4) theword += "гривні";
+      else theword += "гривня";
+      
+	return theword;
+};
+
+console.log(numToWords(a));
+
+</body>
+</html>
+  
+  
