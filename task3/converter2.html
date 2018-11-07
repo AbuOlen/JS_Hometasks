@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>converter2</title>
+</head>
+<body>
+
+<script>
+
+var a = +prompt('Введіть суму'); console.log(a+" грн.");
+
+function numToWords (num) {
+    var word = "";
+    var hund  = Math.floor(num/100);
+    word += hundreds[hund];
+    num -= hund*100;
+    if(num>=20){
+      var ten = Math.floor((num)/10);
+      word += tens[ten];
+      num -= ten*10;
+    }; 
+    word += simpleUnits[num];
+    return word; 
+};
+
+function wordForm(num,prevnum,words){
+  var word = "";
+  if(prevnum == 1){
+    word += words[0];  
+  }else{
+  if (num ===0 || num > 4){
+    word += words[0]; 
+  }else if (num >1 && num <= 4){
+    word += words[2]; 
+  }else word += words[1]; 
+}
+return word;
+};
+
+if (a>999999){
+  console.log("Сума завелика");
+} else if (a===0){
+  console.log("нуль гривень");
+} else{
+
+var simpleUnits = ["нуль ","одна ","дві ","три ","чотири ", "п'ять ","шість ","сім ","вісім ","дев'ять ","десять ","одинадцять ","дванадцять ","тринадцять ","чотирнадцять ","п'ятнадцять ","шістнадцять ","сімнадцять ","вісімнадцять ","дев'ятнадцять "];
+var tens = ["", "", "двадцять ","тридцять ","сорок ","п'ятдесят ", "шістдесят ","сімдесят ","вісімдесят ","дев'яносто "];
+var hundreds = ["","сто ","двісті ","триста ","чотириста ","п'ятсот ","шістсот ","сімсот ","вісімсот ","дев'ятсот "];
+var hryvnia = ["гривень ", "гривня ", "гривні "];
+var millenium = ["тисяч ", "тисяча ", "тисячі "];
+  
+var digits = a.toString().split("");
+digits = digits.reverse();
+
+var n = digits.length;
+
+var result = "";
+if(n>3){
+  result += numToWords (Math.floor(a/1000));
+  if(n>4){
+  result += wordForm (parseInt(digits[3]),parseInt(digits[4]),millenium);
+  }else {
+    result += wordForm (parseInt(digits[3]),0,millenium);
+  }
+};
+result += numToWords (a-((Math.floor(a/1000))*1000));
+  
+if(n>1){
+result += wordForm (parseInt(digits[0]),parseInt(digits[1]),hryvnia);
+}else{
+  result += wordForm (parseInt(digits[0]),0,hryvnia);
+};
+  
+console.log(result);
+}
+</script>
+</body>
+</html>
