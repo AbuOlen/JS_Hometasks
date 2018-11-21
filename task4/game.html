@@ -8,19 +8,36 @@
 <body>
 <script>
 
-  var sum = 1000;
+  var prize = 1000;
+  var i;
 
-  var bet = +prompt("You have " + sum + " hrn. Make your bet, please");
-  var numberForBet = +prompt("Make a number!");
+  for(i=0; (prize < 10000) && (prize > 0); i++){ 
 
-  var dice1 = Math.round(1+Math.random() * (6-1)); console.log(dice1);
-  var dice2 = Math.round(1+Math.random() * (6-1)); console.log(dice2);
+      var bet = +prompt("You have " + prize + " hrn. Make your bet, please");
+      if(bet == 0) 
+         break;  
+      console.log(bet);
+      while (bet > prize) {
+        bet = +prompt("You have " + prize + " hrn. Your don't have enough money. Make your bet, please");
+      };
 
-  var sum = (numberForBet ==(dice1+dice2) && dice1==dice2) ? sum +bet*3 :
-    (numberForBet == (dice1+dice2)) ? sum + bet*2 : sum - bet;
+      var numberForBet = +prompt("Make a number! (From 2 to 12)"); console.log(numberForBet);
+
+      var dice1 = Math.round(1+Math.random() * (6-1)); console.log("1 dice was " + dice1);
+      var dice2 = Math.round(1+Math.random() * (6-1)); console.log("2 dice was " + dice2);
+
+      prize = (numberForBet ==(dice1+dice2) && dice1==dice2) ? prize +bet*3 :
+                (numberForBet == (dice1+dice2)) ? prize + bet*2 : prize - bet;
+
+      console.log("You have " + prize + " hrn now");
+   };
+    console.log("Game is over!");
+    console.log("You have won " + prize + " hrn");
+    console.log("You have played " + i + " rounds" );
+       
   
-  console.log(sum);
-  
+
+
 
 </script>
 </body>
