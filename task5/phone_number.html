@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+</head>
+<body>
+
+
+<script>
+
+var numberPhone = prompt ("Enter phone number with Internation prefix (TC)");
+
+var eucodes = [["Austria",43],["Bulgaria",359],["Belgium",32],["United Kindom",44],["Germany",49],["Hungary",36],["Greece",30],["Italy",39],["Spain",34],["Denmark",45],["Ireland",353],["Lithuania",370],["Latvia",371],["Cyprus",357],["Malta",356],["Netherlands",31],["Luxembourg",352],["Slovenia",386],["Slovakia",421],["Poland",48],["Finland",358],["France",33],["Portugal",351],["Romania",40],["Croatia",385],["Sweden",46],["Czech Republic",420],["Estonia",372]];
+
+function phoneNum(eucodes,numberPhone){ 
+  
+	numberPhone = numberPhone.replace(/\D+/g, '');
+
+	var i=0;
+	var  country;
+	if(numberPhone.length<=15 && numberPhone.length>=10){ 
+  		for (i=0;i<eucodes.length;i++){
+    		if(numberPhone.startsWith(eucodes[i][1])) {
+      			country = eucodes[i][0];
+      			break;
+    		};
+  		};
+	};
+ 
+	var result = {};
+		result.phone = "+" + numberPhone;
+		result.correct = (numberPhone.length<=15 && numberPhone.length>=10);
+		result.inEU = (typeof country !== 'undefined');
+		result.country = result.inEU ? country : "";
+		
+	return result;
+};
+
+var result = phoneNum(eucodes,numberPhone);
+console.log(result)
+
+
+</script>
+</body>
+</html>
+
+
+
+
+
