@@ -141,10 +141,16 @@
 							span.parentNode.style.display = "none";
 						};
 					});
-				}
-				min_price_range.oninput = filter;
-				max_price_range.oninput = filter;
-					
+				};
+				
+				min_price_range.oninput = function(){
+					max_price_range.min=min_price_range.value;
+					filter();
+				};
+				max_price_range.oninput = function(){
+					min_price_range.max=max_price_range.value;
+					filter();
+				};
 
 					
 
