@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	 crossorigin="anonymous">
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="/resources/demos/style.css">
+	<link rel="stylesheet" type="text/css" media="all"
+      href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/smoothness/jquery-ui.css"    />
+	<title>Currency</title>
+
+	<style type="text/css">
+		.ui-datepicker a, input {
+			font-family: fantasy;
+			font-size: 20px;
+			text-decoration: none;
+		}
+		.ui-widget-content { 
+			border:none;
+		}
+		#container {
+			min-width: 310px;
+			max-width: 800px;
+			height: 400px;
+			margin: 0 auto
+		}
+
+	</style>
+
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	 crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/series-label.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	<script src="https://code.highcharts.com/modules/export-data.js"></script>
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-12 text-center">
+				<h1 class="display-6" style="font-size: 25px; font-family: fantasy; font-style: oblique; font-weight: bold;">Курс долара за період:<span id="start"></span><span
+					 id="end">
+					</span></h1>
+			</div>
+			<div class="chartsInputSelector" style="margin-top: 10px; text-align: center; ">
+				<div style="display: inline;">
+					<input type="text" id="from" name="from" style="margin-right: 270px; text-align: center;">
+					<input type="text" id="to" name="to" style="text-align: center;">
+				</div>
+			</div>
+			<br><br>
+		</div>
+		<div id="chartOfRate"></div>
+</body>
+
+<script>
+
+	function url(date) {
+		var n = date.getFullYear().toString() + ("00" + (date.getMonth() + 1).toString()).slice(-2) + date.getDate().toString();
+		return `https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&date=${n}&json`;
+	};
+
+	function draw(rates, year, month, day) {
+		$('#chartOfRate').highcharts({
+			chart: {
+				type: 'line'
+			},
+			title: {
+				text: ''
+			},
+			subtitle: {
+				text: ''
+			},
+			xAxis: {
+				type: 'datetime',
+			},
+			plotOptions: {
+				series: {
+					pointStart: Date.UTC(year, month, day),
+					pointInterval: 24 * 3600 * 1000
+				},
+				line: {
+					dataLabels: {
+						enabled: true
+					},
+					enableMouseTracking: false
+				}
+			},
+			yAxis: {
+				title: {
+					text: 'UAH / USD'
+				},
+			},
+			series: [{
+				name: '',
+				data: rates,
+
+			}]
+		})
+	};
+
+	async function generateData() {
+		var rateOnDates = [];
+		var dateSelected = [];
+		var from_data = $('#from').datepicker('getDate');
+		var to_data = $('#to').datepicker('getDate');
+
+		if ((from_data != null) && (to_data != null)) {
+			var dateStart = $('#from').datepicker('getDate');
+			var dateEnd = $('#to').datepicker('getDate');
+			var dateSel = new Date(dateStart);
+			while (dateSel <= dateEnd) {
+				dateSelected.push(new Date(dateSel));
+				dateSel.setDate(dateSel.getDate() + 1);
+			};
+
+			for (var d of dateSelected) {
+				var url_json = await url(d);
+				await $.getJSON(url_json, (data) => {
+					rateOnDates.push(Number(parseFloat(data[0].rate).toFixed(2)));
+				});
+			}
+			console.log(dateSelected);
+			console.log(rateOnDates);
+			draw(rateOnDates, dateStart.getFullYear(), dateStart.getMonth(), dateStart.getDate());
+		};
+	};
+
+	$(function () {
+		var dateFormat = "d MM yy",
+			from = $("#from").datepicker({
+				dateFormat: "d MM yy",
+				firstDay: 1,
+				defaultDate: "",
+				changeMonth: true,
+				changeYear: true,
+				numberOfMonths: 1,
+				maxDate: 0,
+			})
+				.on("change", function () {
+					$('#start').empty();
+					var s = getDate(this);
+					to.datepicker("option", "minDate", s);
+					$("#start").append(" з " + s.toDateString());
+					generateData();
+				}),
+			to = $("#to").datepicker({
+				dateFormat: "d MM yy",
+				firstDay: 1,
+				defaultDate: "",
+				changeMonth: true,
+				changeYear: true,
+				numberOfMonths: 1,
+				maxDate: 0
+			})
+				.on("change", function () {
+					$('#end').empty();
+					var e = getDate(this);
+					from.datepicker("option", "maxDate", e);
+					$("#end").append(" по " + e.toDateString());
+					generateData();
+				});
+
+		function getDate(element) {
+			var date;
+			try {
+				date = $.datepicker.parseDate(dateFormat, element.value);
+			} catch (error) {
+				date = null;
+			}
+			console.log(date);
+			console.dir(date);
+			return date;
+		};
+	});
+
+</script>
+
+</html>
