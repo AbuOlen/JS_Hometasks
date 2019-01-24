@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		canvas{
+			width: 70vw;
+			height: 40vh;
+			margin: 20px auto;
+			display: block;
+			border: 1px solid #ddd;
+			box-shadow: 0px 0px 5px #ccc;
+		}
+		html, input{
+			font-size: 18pt;
+		}		
+		center {
+			margin-top: 30px;
+			margin-bottom: 20px;
+		}		
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+</head>
+
+<body>
+	<center>
+		Цвет: <input type="color" id="color_selector"> Размер кисти: <input type="number" id="brush_width" min="1" max="32"
+		 value="10">
+	</center>
+	<canvas id="paint-canvas" style="border:1px solid gray; cursor:pointer;"></canvas>
+	<script>
+
+		var canvas = document.querySelector("#paint-canvas");
+		canvas.width = canvas.clientWidth;
+		canvas.height = canvas.clientHeight;
+
+		var context = canvas.getContext("2d");
+		console.log(context);
+		var painting = false;
+
+		canvas.onmousemove = e => {
+			var x = e.offsetX;
+			var y = e.offsetY;
+			var sx = e.offsetX - e.movementY;
+			var sy = e.offsetY - e.movementX;
+			console.log(sx, sy, "=>", x, y);
+
+			if (painting) {
+				context.lineTo(x, y);
+				context.stroke();
+			}
+		};
+		canvas.onmousedown = e => {
+			painting = true;
+			context.moveTo(e.offsetX, e.offsetY);
+		};
+		canvas.onmouseup = canvas.onmouseleave = e => {
+			painting = false;
+		};
+				// color of brash
+
+		var points = new Array(),
+			colorInput = document.getElementById("color_selector");
+		function start(e) {
+			var mouseX = e.pageX - canvas.offsetLeft;
+			var mouseY = e.pageY - canvas.offsetTop;
+			paint = true;
+			ctx.beginPath();
+			ctx.moveTo(mouseX, mouseY);
+			points[points.length] = [mouseX, mouseY];
+		};
+
+		function draw(e) {
+			if (paint) {
+				var mouseX = e.pageX - canvas.offsetLeft;
+				var mouseY = e.pageY - canvas.offsetTop;
+				ctx.lineTo(mouseX, mouseY);
+				ctx.stroke();
+				ctx.strokeStyle = colorInput.value;
+				ctx.lineJoin = ctx.lineCap = 'round';
+				points[points.length] = [mouseX, mouseY];
+			}
+		};
+
+		function stop(e) {
+			paint = false;
+			var s = JSON.stringify(points);
+			localStorage['lines'] = s;
+		};
+
+		var paint = false;
+		var ctx = canvas.getContext("2d");
+		canvas.addEventListener('mousedown', start);
+		canvas.addEventListener('mousemove', draw);
+		canvas.addEventListener('mouseup', stop);
+
+				// size of brush
+				
+		var cw = canvas.width;
+		var ch = canvas.height;
+		function reOffset() {
+			var BB = canvas.getBoundingClientRect();
+			offsetX = BB.left;
+			offsetY = BB.top;
+		};
+		var offsetX, offsetY;
+		reOffset();
+		window.onscroll = function (e) { reOffset(); }
+		window.onresize = function (e) { reOffset(); }
+
+		var isDown = false;
+		var startX, startY;
+
+		ctx.lineCap = 'round';
+		var linewidth = 5;
+		ctx.lineWidth = linewidth;
+		$brush_width = $('#brush_width');
+		$brush_width.attr({ min: 1, max: 25 }).val(linewidth);
+		$brush_width.on('input change', function () {
+			linewidth = ctx.lineWidth = parseInt($(this).val());
+		});
+
+		$("#paint-canvas").mousedown(function (e) { handleMouseDown(e); });
+		$("#paint-canvas").mousemove(function (e) { handleMouseMove(e); });
+		$("#paint-canvas").mouseup(function (e) { handleMouseUpOut(e); });
+		$("#paint-canvas").mouseout(function (e) { handleMouseUpOut(e); });
+
+		function handleMouseDown(e) {
+			// tell the browser we're handling this event
+			e.preventDefault();
+			e.stopPropagation();
+
+			startX = parseInt(e.clientX - offsetX);
+			startY = parseInt(e.clientY - offsetY);
+
+			// Put your mousedown stuff here
+			isDown = true;
+		};
+
+		function handleMouseUpOut(e) {
+			// tell the browser we're handling this event
+			e.preventDefault();
+			e.stopPropagation();
+			// Put your mouseup stuff here
+			isDown = false;
+		};
+
+		function handleMouseMove(e) {
+			if (!isDown) { return; }
+			// tell the browser we're handling this event
+			e.preventDefault();
+			e.stopPropagation();
+
+			mouseX = parseInt(e.clientX - offsetX);
+			mouseY = parseInt(e.clientY - offsetY);
+
+			ctx.beginPath();
+			ctx.moveTo(startX, startY);
+			ctx.lineTo(mouseX, mouseY);
+			ctx.stroke();
+
+			startX = mouseX;
+			startY = mouseY;
+		};
+
+	</script>
+</body>
+</html>

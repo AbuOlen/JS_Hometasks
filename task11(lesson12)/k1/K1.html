@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'),
+                {
+                    center: {
+                        lat: 48.46,
+                        lng: 35.0
+                    },
+                    zoom: 12
+                }
+            );
+
+            window.navigator.geolocation.getCurrentPosition(answer => {
+                console.log(answer);
+                var user = new google.maps.Marker({
+                    position: {
+                        lat: answer.coords.latitude,
+                        lng: answer.coords.longitude
+                    },
+                    title: "Current position"
+                });
+                user.setMap(map);
+                var line = null;
+                function route(user, position) {
+                    if(line != null)
+                        line.setMap(null);
+                    line = new google.maps.Polyline({
+                        path: [
+                            user.position,
+                            position],
+                        geodesic: true,
+                        strokeColor: "#FF0000"
+                    });
+                    line.setMap(map);
+                    var road = new google.maps.DirectionsService();
+                    road.route({
+                        origin: user.position,
+                        destination: position,
+                        travelMode: "DRIVING"
+                    }, answer => {
+                        console.log(answer);
+                        var draw = new google.maps.DirectionsRenderer({
+                            map: map
+                        });
+                        draw.setDirections(answer);
+                    });
+                };
+
+                function distance(office, user) {
+                    var info = new google.maps.InfoWindow({
+                        content: office.title
+                    });
+                    info.open(map, office);
+                    route(user, office.position);
+                };
+               
+                var request = new XMLHttpRequest();
+                request.open('GET', 'https://courses.dp.ua/api/branches.php', true);
+                request.onload = function () {
+                    var url = JSON.parse(this.response);
+                    var closestMarker;
+                    var minDist = Infinity;
+                    for (var i = 0, length = url.length; i < length; i++) {
+                        var marker = new google.maps.Marker({
+                            position: {
+                                lat: url[i].coords.lat,
+                                lng: url[i].coords.lng
+                            },
+                            map: map,
+                            title: url[i].title,
+                            icon: "branche.png"
+                        });
+                        marker.setMap(map);
+                        google.maps.event.addDomListener(marker, 'click', function (event) {
+                            route(user, event.latLng);
+                        });
+                        var d = google.maps.geometry.spherical.computeDistanceBetween(user.position, marker.position);
+                        console.log((d / 1000).toFixed(3) + "km.");
+                        if (d < minDist) {
+                            minDist = d;
+                            closestMarker = marker;
+                        };
+                    };
+                    console.log("Nearest: " + minDist + "m");
+                    route(user, closestMarker.position);
+                }
+                request.send();
+
+            }, answer => {
+                console.log(answer);
+            })
+        }
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRG0ajsLlAJltvx5LrQyjEM2YapxdTRi8&callback=initMap&libraries=geometry"
+        async defer></script>
+</body>
+
+</html>
